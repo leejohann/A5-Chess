@@ -8,6 +8,9 @@ Tile::Tile() : occupied{false}, piece{nullptr} {}
 void Tile::setPiece(Piece *p) {
   this->piece = p;
   this->occupied = true;
+
+  // Make the piece an observer of this tile
+  this->attach(this->piece);
 }
 
 ostream & operator<<(ostream &out, const Tile &t) {
@@ -26,8 +29,18 @@ bool Tile::isOccupied() const {
 }
 
 bool isCapital(char c) {
-  if ((int) c >= 65 && (int) c <= 90) return true;
-  else return false;
+  if (c >= 65 && c <= 90) {
+    /*cout << "capital: ";
+    int num = c;
+    cout << num << endl;*/
+    return true;
+  }
+  else {
+    /*cout << "lower case: ";
+    int num = c;
+    cout << num << endl;*/
+    return false;
+  }
 }
 
 const Colour Tile::getColour() const {
@@ -37,3 +50,5 @@ const Colour Tile::getColour() const {
   }
   else return Colour::None;
 }
+
+Piece * Tile::getPiece() const { return this->piece; }

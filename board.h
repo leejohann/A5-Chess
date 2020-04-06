@@ -7,6 +7,8 @@
 
 typedef std::vector<std::vector<Tile>> matrix;
 
+class InvalidMove {};
+
 class Board {
     matrix grid;
 

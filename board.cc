@@ -13,39 +13,186 @@ Board::Board() {
     this->grid.emplace_back(row);
   }
 
-  this->grid[0][0].setPiece(new Piece{'R'});
-  this->grid[0][1].setPiece(new Piece{'N'});
-  this->grid[0][2].setPiece(new Piece{'B'});
-  this->grid[0][3].setPiece(new Piece{'Q'});
-  this->grid[0][4].setPiece(new Piece{'K'});
-  this->grid[0][5].setPiece(new Piece{'B'});
-  this->grid[0][6].setPiece(new Piece{'N'});
-  this->grid[0][7].setPiece(new Piece{'R'});
+  this->grid[0][0].setPiece(new Piece{'R', Posn{0,0}});
+  this->grid[0][1].setPiece(new Piece{'N', Posn{1,0}});
+  this->grid[0][2].setPiece(new Piece{'B', Posn{2,0}});
+  this->grid[0][3].setPiece(new Piece{'Q', Posn{3,0}});
+  this->grid[0][4].setPiece(new Piece{'K', Posn{4,0}});
+  this->grid[0][5].setPiece(new Piece{'B', Posn{5,0}});
+  this->grid[0][6].setPiece(new Piece{'N', Posn{6,0}});
+  this->grid[0][7].setPiece(new Piece{'R', Posn{7,0}});
   for (unsigned int i = 0; i < this->grid.size(); i++) {
-    this->grid[1][i].setPiece(new Piece{'P'});
-    this->grid[6][i].setPiece(new Piece{'p'});
+    this->grid[1][i].setPiece(new Piece{'P', Posn{(signed) i,1}});
+    this->grid[6][i].setPiece(new Piece{'p', Posn{(signed) i,6}});
   }
 
-  this->grid[7][0].setPiece(new Piece{'r'});
-  this->grid[7][1].setPiece(new Piece{'n'});
-  this->grid[7][2].setPiece(new Piece{'b'});
-  this->grid[7][3].setPiece(new Piece{'q'});
-  this->grid[7][4].setPiece(new Piece{'k'});
-  this->grid[7][5].setPiece(new Piece{'b'});
-  this->grid[7][6].setPiece(new Piece{'n'});
-  this->grid[7][7].setPiece(new Piece{'r'});
+  this->grid[7][0].setPiece(new Piece{'r', Posn{0,7}});
+  this->grid[7][1].setPiece(new Piece{'n', Posn{1,7}});
+  this->grid[7][2].setPiece(new Piece{'b', Posn{2,7}});
+  this->grid[7][3].setPiece(new Piece{'q', Posn{3,7}});
+  this->grid[7][4].setPiece(new Piece{'k', Posn{4,7}});
+  this->grid[7][5].setPiece(new Piece{'b', Posn{5,7}});
+  this->grid[7][6].setPiece(new Piece{'n', Posn{6,7}});
+  this->grid[7][7].setPiece(new Piece{'r', Posn{7,7}});
+
+  // Initialize observers
+  // Each piece sends notifications to each piece in its range of motion
+
+  // (0,0) : Black Rook 1
+  for (unsigned int i = 1; i < 8; i++) {
+    this->grid[0][0].attach(this->grid[0][i].getPiece());
+  }
+  this->grid[0][0].attach(this->grid[1][0].getPiece());
+  // (0,1) : Black Knight 1
+  this->grid[0][1].attach(this->grid[1][3].getPiece());
+  // (0,2) : Black Bishop 1
+  this->grid[0][2].attach(this->grid[1][1].getPiece());
+  this->grid[0][2].attach(this->grid[1][3].getPiece());
+  // (0,3) : Black Queen
+  this->grid[0][3].attach(this->grid[0][2].getPiece());
+  this->grid[0][3].attach(this->grid[0][4].getPiece());
+  this->grid[0][3].attach(this->grid[1][2].getPiece());
+  this->grid[0][3].attach(this->grid[1][3].getPiece());
+  this->grid[0][3].attach(this->grid[1][4].getPiece());
+  // (0,4) : Black King
+  this->grid[0][4].attach(this->grid[0][3].getPiece());
+  this->grid[0][4].attach(this->grid[0][5].getPiece());
+  this->grid[0][4].attach(this->grid[1][3].getPiece());
+  this->grid[0][4].attach(this->grid[1][4].getPiece());
+  this->grid[0][4].attach(this->grid[1][5].getPiece());
+  // (0,5) : Black Bishop 2
+  this->grid[0][5].attach(this->grid[1][4].getPiece());
+  this->grid[0][5].attach(this->grid[1][6].getPiece());
+  // (0,6) : Black Knight 2
+  this->grid[0][6].attach(this->grid[1][4].getPiece());
+  // (0,7) : Black Rook 2
+  for (int i = 0; i < 7; i++) {
+    this->grid[0][7].attach(this->grid[0][i].getPiece());
+  }
+  this->grid[0][6].attach(this->grid[1][7].getPiece());
+
+  // (7,0) : White Rook 1
+  this->grid[7][0].attach(this->grid[6][0].getPiece());
+  this->grid[7][0].attach(this->grid[7][1].getPiece());
+  // (7,1) : White Knight 1
+  this->grid[7][1].attach(this->grid[6][3].getPiece());
+  // (7,2) : White Bishop 1
+  this->grid[7][2].attach(this->grid[6][1].getPiece());
+  this->grid[7][2].attach(this->grid[6][3].getPiece());
+  // (7,3) : White Queen 
+  this->grid[7][3].attach(this->grid[7][2].getPiece());
+  this->grid[7][3].attach(this->grid[6][2].getPiece());
+  this->grid[7][3].attach(this->grid[6][3].getPiece());
+  this->grid[7][3].attach(this->grid[6][4].getPiece());
+  this->grid[7][3].attach(this->grid[7][4].getPiece());
+  // (7,4) : White King
+  this->grid[7][4].attach(this->grid[7][3].getPiece());
+  this->grid[7][4].attach(this->grid[7][5].getPiece());
+  this->grid[7][4].attach(this->grid[6][3].getPiece());
+  this->grid[7][4].attach(this->grid[6][4].getPiece());
+  this->grid[7][4].attach(this->grid[6][5].getPiece());
+  // (7,5) : White Bishop 2
+  this->grid[7][5].attach(this->grid[6][4].getPiece());
+  this->grid[7][5].attach(this->grid[6][6].getPiece());
+  // (7,6) : White Knight 2
+  this->grid[7][6].attach(this->grid[6][3].getPiece());
+  // (7,7) : White Rook 2
+  this->grid[7][7].attach(this->grid[6][7].getPiece());
+  this->grid[7][7].attach(this->grid[7][6].getPiece());
 }
 
+// finds the locations of the spaces between the piece and its intended
+//   destination
+vector<Posn> findPath(char c, const Posn &start, const Posn &dest) {
+  vector<Posn> retval;
+  if (c == 'r' || c == 'R') {
+    if (start.x == dest.x && start.y < dest.y) {
+      for (int i = start.y+1; i < dest.y; i++) retval.emplace_back(Posn{start.x,i});
+    }
+    else if (start.x == dest.x && start.y > dest.y) {
+      for (int i = start.y-1; i > dest.y; i--) retval.emplace_back(Posn{start.x,i});
+    }
+    else if (start.y == dest.y && start.x < dest.y) {
+      for(int i=start.x+1; i<start.y; i++) retval.emplace_back(Posn{i,start.y});
+    }
+    else if (start.y == dest.y && start.x > dest.y) {
+      for(int i=start.x-1; i<start.y; i++) retval.emplace_back(Posn{i,start.y});
+    }
+  }
+  else if (c == 'b' || c == 'B') {
+    if (start.x < dest.x && start.y < dest.y) {
+      for (int i=start.x+1; i<dest.x; i++) {
+        retval.emplace_back(Posn{i,start.y-start.x+i});
+      }
+    }
+    else if (start.x < dest.x && start.y > dest.y) {
+      for (int i=start.x+1, j=start.y-1; i<dest.x; i++, j--) {
+        retval.emplace_back(Posn{i,j});
+      }
+    }
+    else if (start.x > dest.x && start.y > dest.y) {
+      for (int i=start.x-1, j=start.y-1; i>dest.x; i--, j--) {
+        retval.emplace_back(Posn{i,j});
+      }
+    }
+    else if (start.x > dest.x && start.y < dest.y) {
+      for (int i=start.x-1, j=start.y+1; i>dest.x; i--, j++) {
+        retval.emplace_back(Posn{i,j});
+      }
+    }
+  }
+  else if (c == 'q' || c == 'Q') {
+    if (start.x < dest.x && start.y < dest.y) {
+      for (int i=start.x+1; i<dest.x; i++) {
+        retval.emplace_back(Posn{i,start.y-start.x+i});
+      }
+    }
+    else if (start.x < dest.x && start.y > dest.y) {
+      for (int i=start.x+1, j=start.y-1; i<dest.x; i++, j--) {
+        retval.emplace_back(Posn{i,j});
+      }
+    }
+    else if (start.x > dest.x && start.y > dest.y) {
+      for (int i=start.x-1, j=start.y-1; i>dest.x; i--, j--) {
+        retval.emplace_back(Posn{i,j});
+      }
+    }
+    else if (start.x > dest.x && start.y < dest.y) {
+      for (int i=start.x-1, j=start.y+1; i>dest.x; i--, j++) {
+        retval.emplace_back(Posn{i,j});
+      }
+    }
+    else if (start.x == dest.x && start.y < dest.y) {
+      for (int i = start.y+1; i < dest.y; i++) retval.emplace_back(Posn{start.x,i});
+    }
+    else if (start.x == dest.x && start.y > dest.y) {
+      for (int i = start.y-1; i > dest.y; i--) retval.emplace_back(Posn{start.x,i});
+    }
+    else if (start.y == dest.y && start.x < dest.y) {
+      for(int i=start.x+1; i<start.y; i++) retval.emplace_back(Posn{i,start.y});
+    }
+    else if (start.y == dest.y && start.x > dest.y) {
+      for(int i=start.x-1; i<start.y; i++) retval.emplace_back(Posn{i,start.y});
+    }
+  }
+  return retval;
+}
 
+void Board::move(const Posn &start, const Posn &dest, bool isWhite) { 
+  vector<Posn> path = findPath(this->grid[start.y][start.x].getPiece()->getName(), start, dest);
 
-void Board::move(const Posn &start, const Posn &dest, bool isWhite) {
-  if ((this->grid[start.x][start.y].getColour() == Colour::White && isWhite) ||
-      (this->grid[start.x][start.y].getColour() == Colour::Black && !isWhite)) { 
+  for (unsigned int i = 0; i < path.size(); i++) {
+    if (this->grid[path[i].y][path[i].x].isOccupied()) throw InvalidMove{};
+  }
+
+  if (((this->grid[start.y][start.x].getColour() == Colour::White && isWhite) ||
+      (this->grid[start.y][start.x].getColour() == Colour::Black && !isWhite)) &&
+      this->grid[start.y][start.x].getPiece()->inRange(dest)) { 
     this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
     //cout << "new piece set" << endl;
     this->grid[start.y][start.x].removePiece();
     //cout << "old piece removed" << endl;
-  }
+  } else throw InvalidMove{};
 }
 
 ostream & operator<<(ostream &out, const Board &b) {

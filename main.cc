@@ -6,7 +6,7 @@ using namespace std;
 
 int main() {
   Board b;
-  cout << b << endl;
+  cout << b << endl << "it is White's turn" << endl;
   string cmd;
   bool isWhite = true;
   while (true) {
@@ -19,9 +19,15 @@ int main() {
       cin >> destx;
       cin >> desty;
       //cout << "input taken" << endl;
-      b.move(Posn{startx,starty}, Posn{destx,desty}, isWhite);
-      isWhite = !isWhite;
+      try {
+        b.move(Posn{startx,starty}, Posn{destx,desty}, isWhite);
+        isWhite = !isWhite;
+      } catch (InvalidMove&) {
+        cout << "that move is invalid; try again" << endl;
+      }
       cout << b << endl;
+      if (isWhite) cout << "it is White's turn" << endl;
+      else cout << "it is Black's turn" << endl;
     }
   }
 
