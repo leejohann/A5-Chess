@@ -179,6 +179,65 @@ vector<Posn> findPath(char c, const Posn &start, const Posn &dest) {
 }
 
 void Board::move(const Posn &start, const Posn &dest, bool isWhite) { 
+  // Special case: moving a pawn
+  // White pawn
+  if (this->grid[start.y][start.x].getPiece()->getName() == 'p') {
+    cout << "pawn" << endl;
+    // Check range : movement
+    if (start.x == dest.x && (start.y == dest.y+1 || start.y == dest.y+2)) {
+      // Check player's turn
+      if ((this->grid[start.y][start.x].getColour() == Colour::White && isWhite) ||
+          (this->grid[start.y][start.x].getColour() == Colour::Black && !isWhite)) { 
+        this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
+        this->grid[start.y][start.x].removePiece();
+      } else {
+        cout << "wrong colour" << endl;
+        throw InvalidMove{};}
+    }
+    // Check range : capture
+    else if (start.y == dest.y+2 && (start.x == dest.x-2 || start.x == dest.x+2)) {
+      // Check for piece to capture
+      Tile *capture;
+      if (start.x == dest.x-2) capture = &this->grid[start.y-1][start.x+1];
+      else if (start.x == dest.x+2) capture = &this->grid[start.y-1][start.x-1];
+      if (capture->isOccupied() == false) throw InvalidMove{};
+      else capture->removePiece();
+    }
+    else {
+      cout << "invalid dest" << endl;
+      throw InvalidMove{};}
+    return;
+  }
+  // Black Pawn
+  else if (this->grid[start.y][start.x].getPiece()->getName() == 'P') {
+    cout << "black pawn" << endl;
+    cout << "pawn" << endl;
+    // Check range : movement
+    if (start.x == dest.x && (start.y == dest.y-1 || start.y == dest.y-2)) {
+      // Check player's turn
+      if ((this->grid[start.y][start.x].getColour() == Colour::White && isWhite) ||
+          (this->grid[start.y][start.x].getColour() == Colour::Black && !isWhite)) { 
+        this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
+        this->grid[start.y][start.x].removePiece();
+      } else {
+        cout << "wrong colour" << endl;
+        throw InvalidMove{};}
+    }
+    // Check range : capture
+    else if (start.y == dest.y-2 && (start.x == dest.x-2 || start.x == dest.x+2)) {
+      // Check for piece to capture
+      Tile *capture;
+      if (start.x == dest.x-2) capture = &this->grid[start.y+1][start.x+1];
+      else if (start.x == dest.x+2) capture = &this->grid[start.y+1][start.x-1];
+      if (capture->isOccupied() == false) throw InvalidMove{};
+      else capture->removePiece();
+    }
+    else {
+      cout << "invalid dest" << endl;
+      throw InvalidMove{};}
+    return;
+  }
+
   vector<Posn> path = findPath(this->grid[start.y][start.x].getPiece()->getName(), start, dest);
 
   for (unsigned int i = 0; i < path.size(); i++) {

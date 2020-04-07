@@ -43,10 +43,6 @@ vector<Posn> calculateRange(char c) {
       retval.emplace_back(Posn{i,i});
     }
   }
-  else if (c == 'p' || c == 'P') {
-    retval.emplace_back(Posn{0,1});
-    retval.emplace_back(Posn{0,2});
-  }
   return retval;
 }
 
