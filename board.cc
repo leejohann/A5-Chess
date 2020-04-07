@@ -13,6 +13,7 @@ Board::Board() {
     this->grid.emplace_back(row);
   }
 
+  // Initialize the board
   this->grid[0][0].setPiece(new Piece{'R', Posn{0,0}});
   this->grid[0][1].setPiece(new Piece{'N', Posn{1,0}});
   this->grid[0][2].setPiece(new Piece{'B', Posn{2,0}});
@@ -178,11 +179,19 @@ vector<Posn> findPath(char c, const Posn &start, const Posn &dest) {
   return retval;
 }
 
+
+// move(start, dest, isWhite) moves the piece located at start to dest
+//   isWhite indicates if it is the turn of the player playing for White or not
+//   if the move fails due to violating the rules, an InvalidMove exception 
+//   will be thrown
+// Effects: Mutates this->grid
+// Efficiency: O(n)
+// Requires: 0 <= start.x, start.y, dest.x, dest.y <= 7
 void Board::move(const Posn &start, const Posn &dest, bool isWhite) { 
   // Special case: moving a pawn
   // White pawn
   if (this->grid[start.y][start.x].getPiece()->getName() == 'p') {
-    cout << "pawn" << endl;
+    //cout << "pawn" << endl;
     // Check range : movement
     if (start.x == dest.x && (start.y == dest.y+1 || start.y == dest.y+2)) {
       // Check player's turn
@@ -191,7 +200,7 @@ void Board::move(const Posn &start, const Posn &dest, bool isWhite) {
         this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
         this->grid[start.y][start.x].removePiece();
       } else {
-        cout << "wrong colour" << endl;
+        //cout << "wrong colour" << endl;
         throw InvalidMove{};}
     }
     // Check range : capture
@@ -204,14 +213,14 @@ void Board::move(const Posn &start, const Posn &dest, bool isWhite) {
       else capture->removePiece();
     }
     else {
-      cout << "invalid dest" << endl;
+      //cout << "invalid dest" << endl;
       throw InvalidMove{};}
     return;
   }
   // Black Pawn
   else if (this->grid[start.y][start.x].getPiece()->getName() == 'P') {
-    cout << "black pawn" << endl;
-    cout << "pawn" << endl;
+    //cout << "black pawn" << endl;
+    //cout << "pawn" << endl;
     // Check range : movement
     if (start.x == dest.x && (start.y == dest.y-1 || start.y == dest.y-2)) {
       // Check player's turn
@@ -220,7 +229,7 @@ void Board::move(const Posn &start, const Posn &dest, bool isWhite) {
         this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
         this->grid[start.y][start.x].removePiece();
       } else {
-        cout << "wrong colour" << endl;
+        //cout << "wrong colour" << endl;
         throw InvalidMove{};}
     }
     // Check range : capture
@@ -233,17 +242,24 @@ void Board::move(const Posn &start, const Posn &dest, bool isWhite) {
       else capture->removePiece();
     }
     else {
-      cout << "invalid dest" << endl;
+      //cout << "invalid dest" << endl;
       throw InvalidMove{};}
     return;
   }
 
+  // path of tiles between start and dest (not including start or dest)
   vector<Posn> path = findPath(this->grid[start.y][start.x].getPiece()->getName(), start, dest);
 
-  for (unsigned int i = 0; i < path.size(); i++) {
-    if (this->grid[path[i].y][path[i].x].isOccupied()) throw InvalidMove{};
+  // tests if the chosen path is obstructed (for all pieces other than knight)
+  if (this->grid[start.y][start.x].getPiece()->getName() != 'n' &&
+      this->grid[start.y][start.x].getPiece()->getName() != 'N') {
+    for (unsigned int i = 0; i < path.size(); i++) {
+      if (this->grid[path[i].y][path[i].x].isOccupied()) throw InvalidMove{};
+    }
   }
 
+  // check if the player is chosing a piece of their colour, with a destination
+  //   in the appropriate range
   if (((this->grid[start.y][start.x].getColour() == Colour::White && isWhite) ||
       (this->grid[start.y][start.x].getColour() == Colour::Black && !isWhite)) &&
       this->grid[start.y][start.x].getPiece()->inRange(dest)) { 
@@ -254,6 +270,14 @@ void Board::move(const Posn &start, const Posn &dest, bool isWhite) {
   } else throw InvalidMove{};
 }
 
+// operator<<(out, b) outputs the board to out int the following format:
+//   black pieces are represented by capital letters
+//   white pieces are represented by lower case letters
+//   free white spaces are blank spaces
+//   free black spaces are underscores
+// Requires: none
+// Effects: outputs to out
+// Efficiency: O(n^2)
 ostream & operator<<(ostream &out, const Board &b) {
   for (unsigned int i = 0; i < b.grid.size(); i++) {
     for (unsigned int j = 0; j < b.grid[i].size(); j++) {
