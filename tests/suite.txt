@@ -1,0 +1,9 @@
+invalid_path_rook1
+range_knight1
+range_knight2
+range_knight3
+range_knight4
+range_knight5
+range_knight6
+range_knight7
+range_knight8
