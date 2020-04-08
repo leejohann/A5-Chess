@@ -3,11 +3,12 @@
 
 #include "state.h"
 #include "observer.h"
+#include "subject.h"
 #include <vector>
 
 class Subject;
 
-class Piece : public Observer {
+class Piece : public Observer, public Subject {
   char name;
   bool captured;
   Posn pos;
@@ -18,6 +19,7 @@ class Piece : public Observer {
     Piece(char, Posn);
     ~Piece() {}
     virtual void notify(Subject&) override;
+    virtual Info getInfo() const;
     bool inRange(Posn dest) const;
 
     // accessors

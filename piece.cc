@@ -52,9 +52,15 @@ Piece::Piece(char c, Posn p) : name{c}, captured{false}, pos{p}, range{calculate
 char Piece::getName() { return this->name; }
 
 void Piece::notify(Subject& whoFrom) {
-  if (whoFrom.getState().type == StateType::Request) {
+  //cout << "piece notify" << endl;
+  if (whoFrom.getState().type == StateType::Affirmative) {
+    //cout << "Piece: Affirmative" << endl;
     this->captured = true;
   }
+}
+
+Info Piece::getInfo() const {
+  return Info{this->pos, this->name};
 }
 
 bool Piece::inRange(Posn dest) const {

@@ -1,8 +1,11 @@
 #include "subject.h"
 #include "observer.h"
+#include <iostream>
 
-Subject::Subject() : state{State{Posn{0,0},StateType::Negative}} {
-  
+using namespace std;
+
+Subject::Subject() {
+  //this->state = State{Posn{0,0},Posn{0,0},StateType::Negative,' '};
 }
 
 Subject::~Subject() {}

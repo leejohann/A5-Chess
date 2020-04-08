@@ -8,10 +8,13 @@ Board::Board() {
   for (int i = 0; i < 8; i++) {
     vector<Tile> row;
     for (int j = 0; j < 8; j++) {
-      row.emplace_back(Tile());
+      row.emplace_back(Tile(Posn{j,i}));
+      //cout << "initialized tile" << endl;
     }
     this->grid.emplace_back(row);
   }
+
+  //cout << "grid initialized" << endl;
 
   // Initialize the board
   this->grid[0][0].setPiece(new Piece{'R', Posn{0,0}});
@@ -39,6 +42,7 @@ Board::Board() {
   // Initialize observers
   // Each piece sends notifications to each piece in its range of motion
 
+  /*
   // (0,0) : Black Rook 1
   for (unsigned int i = 1; i < 8; i++) {
     this->grid[0][0].attach(this->grid[0][i].getPiece());
@@ -100,13 +104,77 @@ Board::Board() {
   // (7,7) : White Rook 2
   this->grid[7][7].attach(this->grid[6][7].getPiece());
   this->grid[7][7].attach(this->grid[7][6].getPiece());
+  */
+
+  // attach each tile to each of its 8-directional neighbours
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      this->grid[i][j].attach(this);
+      //cout << "attached tile to grid" << endl;
+      if (i > 0 && j > 0) {
+        this->grid[i][j].attach(&this->grid[i-1][j-1]);
+        this->grid[i-1][j-1].attach(&this->grid[i][j]);
+        //cout << "NW attached" << endl;
+      }
+      if (i > 0 && j < 7) {
+        this->grid[i][j].attach(&this->grid[i-1][j+1]);
+        this->grid[i-1][j+1].attach(&this->grid[i][j]);
+        //cout << "NE attached" << endl;
+      }
+      if (i < 7 && j < 7) {
+        //cout << "SE: (" << i << "," << j << ")" << endl;
+        this->grid[i][j].attach(&this->grid[i+1][j+1]);
+        this->grid[i+1][j+1].attach(&this->grid[i][j]);
+        //cout << "SE attached" << endl;
+      }
+      if (i < 7 && j > 0) {
+        this->grid[i][j].attach(&this->grid[i+1][j-1]);
+        this->grid[i+1][j-1].attach(&this->grid[i][j]);
+        //cout << "SW attached" << endl;
+      }
+      if (i > 0) {
+        this->grid[i][j].attach(&this->grid[i-1][j]);
+        this->grid[i-1][j].attach(&this->grid[i][j]);
+        //cout << "N attached" << endl;
+      }
+      if (i < 7) {
+        this->grid[i+1][j].attach(&this->grid[i][j]);
+        this->grid[i][j].attach(&this->grid[i+1][j]);
+        //cout << "S attached" << endl;
+      }
+      if (j > 0) {
+        this->grid[i][j].attach(&this->grid[i][j-1]);
+        this->grid[i][j-1].attach(&this->grid[i][j]);
+        //cout << "W attached" << endl;
+      }
+      if (j < 7) {
+        this->grid[i][j].attach(&this->grid[i][j+1]);
+        this->grid[i][j+1].attach(&this->grid[i][j]);
+        //cout << "E attached" << endl;
+      }
+    }
+  }
+}
+
+void Board::notify(Subject &whoFrom) {
+  //cout << "board notify" << endl;
+  if (whoFrom.getState().type == StateType::Affirmative) {
+    //cout << "removing a piece" << endl;
+    Posn dest = whoFrom.getState().destination;
+    Posn start = whoFrom.getState().start;
+    this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
+    this->grid[start.y][start.x].removePiece();
+  }
 }
 
 // finds the locations of the spaces between the piece and its intended
 //   destination
 vector<Posn> findPath(char c, const Posn &start, const Posn &dest) {
   vector<Posn> retval;
-  if (c == 'r' || c == 'R') {
+  //cout << "findPath - start: " << start.x << "," << start.y << endl;
+  //cout << "findPath - dest: " << dest.x << "," << dest.y << endl;
+  if (c == 'r' || c == 'R' || c == 'p' || c == 'P') {
+    //cout << "findPath: rook/pawn" << endl;
     if (start.x == dest.x && start.y < dest.y) {
       for (int i = start.y+1; i < dest.y; i++) retval.emplace_back(Posn{start.x,i});
     }
@@ -176,9 +244,26 @@ vector<Posn> findPath(char c, const Posn &start, const Posn &dest) {
       for(int i=start.x-1; i<start.y; i++) retval.emplace_back(Posn{i,start.y});
     }
   }
+  else if (c == 'n' || c == 'N') {
+    if (start.x == dest.x-2) {
+      retval.emplace_back(Posn{start.x+1,start.y});
+      retval.emplace_back(Posn{start.x+2,start.y});
+    }
+    else if (start.x == dest.x+2) {
+      retval.emplace_back(Posn{start.x-1,start.y});
+      retval.emplace_back(Posn{start.x-2,start.y});
+    }
+    else if (start.y == dest.y-2) {
+      retval.emplace_back(Posn{start.x,start.y+1});
+      retval.emplace_back(Posn{start.x,start.y+2});
+    }
+    else if (start.y == dest.y+2) {
+      retval.emplace_back(Posn{start.x,start.y-1});
+      retval.emplace_back(Posn{start.x,start.y-2});
+    }
+  }
   return retval;
 }
-
 
 // move(start, dest, isWhite) moves the piece located at start to dest
 //   isWhite indicates if it is the turn of the player playing for White or not
@@ -188,85 +273,14 @@ vector<Posn> findPath(char c, const Posn &start, const Posn &dest) {
 // Efficiency: O(n)
 // Requires: 0 <= start.x, start.y, dest.x, dest.y <= 7
 void Board::move(const Posn &start, const Posn &dest, bool isWhite) { 
-  // Special case: moving a pawn
-  // White pawn
-  if (this->grid[start.y][start.x].getPiece()->getName() == 'p') {
-    //cout << "pawn" << endl;
-    // Check range : movement
-    if (start.x == dest.x && (start.y == dest.y+1 || start.y == dest.y+2)) {
-      // Check player's turn
-      if ((this->grid[start.y][start.x].getColour() == Colour::White && isWhite) ||
-          (this->grid[start.y][start.x].getColour() == Colour::Black && !isWhite)) { 
-        this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
-        this->grid[start.y][start.x].removePiece();
-      } else {
-        //cout << "wrong colour" << endl;
-        throw InvalidMove{};}
-    }
-    // Check range : capture
-    else if (start.y == dest.y+2 && (start.x == dest.x-2 || start.x == dest.x+2)) {
-      // Check for piece to capture
-      Tile *capture;
-      if (start.x == dest.x-2) capture = &this->grid[start.y-1][start.x+1];
-      else if (start.x == dest.x+2) capture = &this->grid[start.y-1][start.x-1];
-      if (capture->isOccupied() == false) throw InvalidMove{};
-      else capture->removePiece();
-    }
-    else {
-      //cout << "invalid dest" << endl;
-      throw InvalidMove{};}
-    return;
-  }
-  // Black Pawn
-  else if (this->grid[start.y][start.x].getPiece()->getName() == 'P') {
-    //cout << "black pawn" << endl;
-    //cout << "pawn" << endl;
-    // Check range : movement
-    if (start.x == dest.x && (start.y == dest.y-1 || start.y == dest.y-2)) {
-      // Check player's turn
-      if ((this->grid[start.y][start.x].getColour() == Colour::White && isWhite) ||
-          (this->grid[start.y][start.x].getColour() == Colour::Black && !isWhite)) { 
-        this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
-        this->grid[start.y][start.x].removePiece();
-      } else {
-        //cout << "wrong colour" << endl;
-        throw InvalidMove{};}
-    }
-    // Check range : capture
-    else if (start.y == dest.y-2 && (start.x == dest.x-2 || start.x == dest.x+2)) {
-      // Check for piece to capture
-      Tile *capture;
-      if (start.x == dest.x-2) capture = &this->grid[start.y+1][start.x+1];
-      else if (start.x == dest.x+2) capture = &this->grid[start.y+1][start.x-1];
-      if (capture->isOccupied() == false) throw InvalidMove{};
-      else capture->removePiece();
-    }
-    else {
-      //cout << "invalid dest" << endl;
-      throw InvalidMove{};}
-    return;
-  }
-
-  // path of tiles between start and dest (not including start or dest)
-  vector<Posn> path = findPath(this->grid[start.y][start.x].getPiece()->getName(), start, dest);
-
-  // tests if the chosen path is obstructed (for all pieces other than knight)
-  if (this->grid[start.y][start.x].getPiece()->getName() != 'n' &&
-      this->grid[start.y][start.x].getPiece()->getName() != 'N') {
-    for (unsigned int i = 0; i < path.size(); i++) {
-      if (this->grid[path[i].y][path[i].x].isOccupied()) throw InvalidMove{};
-    }
-  }
-
-  // check if the player is chosing a piece of their colour, with a destination
-  //   in the appropriate range
-  if (((this->grid[start.y][start.x].getColour() == Colour::White && isWhite) ||
-      (this->grid[start.y][start.x].getColour() == Colour::Black && !isWhite)) &&
-      this->grid[start.y][start.x].getPiece()->inRange(dest)) { 
-    this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
-    //cout << "new piece set" << endl;
-    this->grid[start.y][start.x].removePiece();
-    //cout << "old piece removed" << endl;
+  if (this->grid[start.y][start.x].isOccupied() == false) throw InvalidMove{};
+  if ((this->grid[start.y][start.x].getColour() == Colour::White && isWhite) ||
+      (this->grid[start.y][start.x].getColour() == Colour::Black && !isWhite)){
+    vector<Posn> path = findPath(this->grid[start.y][start.x].getPiece()->getName(),start,dest);
+    this->grid[start.y][start.x].setState(State{dest, start, path, StateType::Request,
+        this->grid[start.y][start.x].getPiece()->getName()});
+    //cout << "requesting from board" << endl;
+    this->grid[start.y][start.x].notifyObservers();
   } else throw InvalidMove{};
 }
 

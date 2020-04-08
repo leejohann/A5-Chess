@@ -6,7 +6,10 @@
 class Posn {
   public:
     int x, y;
+    Posn();
     Posn(int x, int y);
+    Posn(const Posn&);
+    bool operator==(const Posn&);
     //Posn();
 };
 

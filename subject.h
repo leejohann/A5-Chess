@@ -15,6 +15,7 @@ class Subject {
     ~Subject();
     void setState(const State&);
     State getState() const;
+    virtual Info getInfo() const = 0;
     void attach(Observer*);
     void notifyObservers();
 };
