@@ -1,3 +1,8 @@
+chain_bishop1
+chain_knight1
+chain_knight2
+chain_pawn1
+chain_pawn2
 invalid_path_rook1
 range_knight1
 range_knight2
@@ -7,3 +12,10 @@ range_knight5
 range_knight6
 range_knight7
 range_knight8
+range_pawn1
+range_pawn2
+range_pawn3
+range_rook1
+range_rook2
+range_rook3
+range_rook4

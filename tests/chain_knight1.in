@@ -1,0 +1,5 @@
+move 1 7 0 5
+move 1 0 0 2
+move 0 5 2 4
+move 0 2 2 3
+quit
