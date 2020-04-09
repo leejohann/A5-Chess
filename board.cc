@@ -17,27 +17,27 @@ Board::Board() {
   //cout << "grid initialized" << endl;
 
   // Initialize the board
-  this->grid[0][0].setPiece(new Piece{'R', Posn{0,0}});
-  this->grid[0][1].setPiece(new Piece{'N', Posn{1,0}});
-  this->grid[0][2].setPiece(new Piece{'B', Posn{2,0}});
-  this->grid[0][3].setPiece(new Piece{'Q', Posn{3,0}});
-  this->grid[0][4].setPiece(new Piece{'K', Posn{4,0}});
-  this->grid[0][5].setPiece(new Piece{'B', Posn{5,0}});
-  this->grid[0][6].setPiece(new Piece{'N', Posn{6,0}});
-  this->grid[0][7].setPiece(new Piece{'R', Posn{7,0}});
+  this->grid[0][0].setPiece(new Piece{'R'});
+  this->grid[0][1].setPiece(new Piece{'N'});
+  this->grid[0][2].setPiece(new Piece{'B'});
+  this->grid[0][3].setPiece(new Piece{'Q'});
+  this->grid[0][4].setPiece(new Piece{'K'});
+  this->grid[0][5].setPiece(new Piece{'B'});
+  this->grid[0][6].setPiece(new Piece{'N'});
+  this->grid[0][7].setPiece(new Piece{'R'});
   for (unsigned int i = 0; i < this->grid.size(); i++) {
-    this->grid[1][i].setPiece(new Piece{'P', Posn{(signed) i,1}});
-    this->grid[6][i].setPiece(new Piece{'p', Posn{(signed) i,6}});
+    this->grid[1][i].setPiece(new Piece{'P'});
+    this->grid[6][i].setPiece(new Piece{'p'});
   }
 
-  this->grid[7][0].setPiece(new Piece{'r', Posn{0,7}});
-  this->grid[7][1].setPiece(new Piece{'n', Posn{1,7}});
-  this->grid[7][2].setPiece(new Piece{'b', Posn{2,7}});
-  this->grid[7][3].setPiece(new Piece{'q', Posn{3,7}});
-  this->grid[7][4].setPiece(new Piece{'k', Posn{4,7}});
-  this->grid[7][5].setPiece(new Piece{'b', Posn{5,7}});
-  this->grid[7][6].setPiece(new Piece{'n', Posn{6,7}});
-  this->grid[7][7].setPiece(new Piece{'r', Posn{7,7}});
+  this->grid[7][0].setPiece(new Piece{'r'});
+  this->grid[7][1].setPiece(new Piece{'n'});
+  this->grid[7][2].setPiece(new Piece{'b'});
+  this->grid[7][3].setPiece(new Piece{'q'});
+  this->grid[7][4].setPiece(new Piece{'k'});
+  this->grid[7][5].setPiece(new Piece{'b'});
+  this->grid[7][6].setPiece(new Piece{'n'});
+  this->grid[7][7].setPiece(new Piece{'r'});
 
   // Initialize observers
   // attach each tile to each of its 8-directional neighbours
@@ -96,7 +96,7 @@ void Board::notify(Subject &whoFrom) {
     //cout << "removing a piece" << endl;
     Posn dest = whoFrom.getState().destination;
     Posn start = whoFrom.getState().start;
-    this->grid[dest.y][dest.x] = this->grid[start.y][start.x];
+    this->grid[dest.y][dest.x].setPiece(this->grid[start.y][start.x].getPiece());
     this->grid[start.y][start.x].removePiece();
   }
 }
@@ -208,6 +208,9 @@ vector<Posn> findPath(char c, const Posn &start, const Posn &dest) {
 // Requires: 0 <= start.x, start.y, dest.x, dest.y <= 7
 void Board::move(const Posn &start, const Posn &dest, bool isWhite) { 
   if (this->grid[start.y][start.x].isOccupied() == false) throw InvalidMove{};
+  else if (this->grid[dest.y][dest.x].isOccupied() && 
+  (this->grid[start.y][start.x].getColour() == this->grid[dest.y][dest.x].getColour()))
+    throw InvalidMove{};
   if ((this->grid[start.y][start.x].getColour() == Colour::White && isWhite) ||
       (this->grid[start.y][start.x].getColour() == Colour::Black && !isWhite)){
     vector<Posn> path = findPath(this->grid[start.y][start.x].getPiece()->getName(),start,dest);
@@ -215,7 +218,9 @@ void Board::move(const Posn &start, const Posn &dest, bool isWhite) {
         this->grid[start.y][start.x].getPiece()->getName()});
     //cout << "requesting from board" << endl;
     this->grid[start.y][start.x].notifyObservers();
-  } else throw InvalidMove{};
+  } else {
+    //cout << "bad starting piece" << endl;
+    throw InvalidMove{};}
 }
 
 // operator<<(out, b) outputs the board to out int the following format:

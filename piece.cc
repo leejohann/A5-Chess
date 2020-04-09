@@ -46,8 +46,8 @@ vector<Posn> calculateRange(char c) {
   return retval;
 }
 
-Piece::Piece(char c) : name{c}, captured{false}, pos{Posn{0,0}}, range{calculateRange(c)} {}
-Piece::Piece(char c, Posn p) : name{c}, captured{false}, pos{p}, range{calculateRange(c)} {}
+Piece::Piece(char c) : name{c}, captured{false} {}
+//Piece::Piece(char c, Posn p) : name{c}, captured{false}, pos{p}, range{calculateRange(c)} {}
 
 char Piece::getName() { return this->name; }
 
@@ -60,9 +60,9 @@ void Piece::notify(Subject& whoFrom) {
 }
 
 Info Piece::getInfo() const {
-  return Info{this->pos, this->name};
+  return Info{Posn{0,0}, this->name};
 }
-
+/*
 bool Piece::inRange(Posn dest) const {
   for (unsigned int i = 0; i < this->range.size(); i++) {
     int x = this->pos.x + this->range[i].x;
@@ -70,6 +70,6 @@ bool Piece::inRange(Posn dest) const {
     if (x == dest.x && y == dest.y) return true;
   }
   return false;
-}
+}*/
 
-Posn Piece::getPos() { return this->pos; }
+//Posn Piece::getPos() { return this->pos; }

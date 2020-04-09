@@ -59,13 +59,13 @@ void Tile::notify(Subject& whoFrom) {
   else cout << "none" << endl;*/
 
   if (whoFrom.getState().type == StateType::Request) {
-    /*
-    cout << "Tile: Request" << endl;
     
-    cout << "path found :";
-    for (unsigned int i = 0; i < whoFrom.getState().path.size(); i++) cout << whoFrom.getState().path[i].x << "," << whoFrom.getState().path[i].y << " ";
-    cout << "]" << endl;*/
-    if (whoFrom.getState().destination == this->getPos()) {
+    //cout << "Tile: Request" << endl;
+    
+    //cout << "path found :";
+    //for (unsigned int i = 0; i < whoFrom.getState().path.size(); i++) cout << whoFrom.getState().path[i].x << "," << whoFrom.getState().path[i].y << " ";
+    //cout << "]" << endl;
+    if (whoFrom.getState().destination == this->getPos()){
       //cout << "Tile: Request - destination reached" << endl;
       State newState = whoFrom.getState();
       newState.type = StateType::Affirmative;
@@ -76,7 +76,8 @@ void Tile::notify(Subject& whoFrom) {
     else if (!whoFrom.getState().path.empty() && this->pos == whoFrom.getState().path.front()) {
       //cout << "Tile: Request - on path" << endl;
       if (this->occupied && whoFrom.getState().name != 'n' &&
-          whoFrom.getState().name != 'N') throw InvalidMove{};
+          whoFrom.getState().name != 'N') { //cout << "dest occupied" << endl;
+            throw InvalidMove{};}
       State newState = whoFrom.getState();
       // erase this tile from the path
       newState.path.erase(newState.path.begin()); 
