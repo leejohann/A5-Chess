@@ -19,8 +19,9 @@ class Piece : public Observer, public Subject {
     Piece(char, Posn);
     ~Piece() {}
     virtual void notify(Subject&) override;
-    virtual Info getInfo() const;
+    virtual Info getInfo() const override;
     bool inRange(Posn dest) const;
+    void isCaptured();
 
     // accessors
     char getName();

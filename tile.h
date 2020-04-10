@@ -22,6 +22,7 @@ class Tile : public Subject, public Observer {
     void setPiece(Piece*);
     void removePiece();
     bool isOccupied() const;
+    void pieceCaptured();
     
     virtual void notify(Subject&);
     virtual Info getInfo() const;

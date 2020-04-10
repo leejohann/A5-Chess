@@ -16,6 +16,10 @@ class Board : public Observer {
     public:
         Board();
         void move(const Posn &, const Posn &, bool);
+        void capture(const Posn&, const Posn&, bool);
+        bool setupCheck();
+        void findPiece(char c, Posn &);
+        void removePiece(Posn &);
         friend std::ostream &operator<<(std::ostream&, const Board&);
         virtual void notify(Subject &);
 

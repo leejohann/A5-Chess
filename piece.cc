@@ -3,6 +3,7 @@
 
 using namespace std;
 
+// calculateRange(char C) returns a vector of Posns that the piece represented by c can move to
 vector<Posn> calculateRange(char c) {
   vector<Posn> retval;
   if (c == 'r' || c == 'R') {
@@ -63,6 +64,8 @@ Info Piece::getInfo() const {
   return Info{this->pos, this->name};
 }
 
+// inRange(Posn dest) returns a boolean value indicating if the 
+//    destination tile is within range of the piece.
 bool Piece::inRange(Posn dest) const {
   for (unsigned int i = 0; i < this->range.size(); i++) {
     int x = this->pos.x + this->range[i].x;
@@ -73,3 +76,8 @@ bool Piece::inRange(Posn dest) const {
 }
 
 Posn Piece::getPos() { return this->pos; }
+
+void Piece::isCaptured() {
+  this->captured = true;
+  cout << this->name << " has been captured." << endl;
+}

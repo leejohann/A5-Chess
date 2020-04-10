@@ -129,3 +129,10 @@ const Colour Tile::getColour() const {
 
 Piece * Tile::getPiece() const { return this->piece; }
 Posn Tile::getPos() const { return this->pos; }
+
+void Tile::pieceCaptured() {
+  this->occupied = false;
+  this->removePiece();
+  this->piece->isCaptured();
+  cout << "Tile is no longer occupied" << endl;
+}

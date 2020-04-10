@@ -215,7 +215,95 @@ void Board::move(const Posn &start, const Posn &dest, bool isWhite) {
         this->grid[start.y][start.x].getPiece()->getName()});
     //cout << "requesting from board" << endl;
     this->grid[start.y][start.x].notifyObservers();
+    capture(start, dest, isWhite);
   } else throw InvalidMove{};
+}
+
+// capture(start, dest, isWhite) checks if a move would result in a capture, returns void
+//    if not, captures piece on dest tile, and removes piece from dest tile
+void Board::capture(const Posn &start, const Posn &dest, bool isWhite) {
+  // if dest tile is unoccupied, return void
+  if (this->grid[dest.y][dest.x].isOccupied() ==  false) { 
+    cout << "dest tile is unoccupied, no capture possible" << endl;
+    return; }
+  // check if start piece is player's piece, dest piece is opponent's piece
+  if (this->grid[start.y][start.x].isOccupied() == false) throw InvalidMove{};
+  if (isWhite) {
+    if ((this->grid[start.y][start.x].getColour() == Colour::White) &&
+        (this->grid[dest.y][dest.x].getColour() == Colour::White)) {
+          cout << "you're trying to capture your own piece (white)" << endl;
+          throw InvalidMove{};
+        }
+  } if (!isWhite) {
+    if ((this->grid[start.y][start.x].getColour() == Colour::Black) &&
+        (this->grid[dest.y][dest.x].getColour() == Colour::Black)) {
+          cout << "you're trying to capture your own piece (black)" << endl;
+          throw InvalidMove{};
+        }
+  } // removing piece from dest tile, capture piece
+  this->grid[dest.y][dest.x].pieceCaptured();
+
+}
+
+// setupCheck() returns a boolean value indicating if the following are true:
+//    1. There is exactly 1 black K and 1 white K on the board
+//    2. There are no Pawns on the first or last row of the board
+//    3. Neither of the Ks are in check
+bool Board::setupCheck() {
+  // checking 1
+  int blackK = 0;
+  int whiteK = 0; 
+  bool pawnCheck = false;
+  bool kingInCheck = false;
+  for (int i=0; i<8; i++) {
+    for (int j=0; j<8; j++) {
+      if (this->grid[i][j].isOccupied()) {
+        // checking condition 1
+        if (this->grid[i][j].getPiece()->getName() == 'K') {
+          ++whiteK;
+        } else if (this->grid[i][j].getPiece()->getName() == 'k') {
+          ++blackK;
+        }
+        // checking condition 2
+        if (i==0 || i==7) {
+          if ((this->grid[i][j].getPiece()->getName() == 'P') ||
+              (this->grid[i][j].getPiece()->getName() == 'p')) {
+                pawnCheck = true;
+              }
+        }
+      }
+    }
+  } 
+  // check condition 3
+  if (blackK==1 && whiteK==1 && !pawnCheck && !kingInCheck) { return true; }
+  else {
+    cout << "There are " << blackK << " black Kings." << endl;
+    cout << "There are " << whiteK << " white Kings." << endl;
+    if (pawnCheck) {
+      cout << "There is a pawn on the first/last row of the board." << endl;
+    } if (kingInCheck) {
+      cout << "A King is in check." << endl;
+    }
+  } return false;
+}
+
+// findPiece(char c) finds the piece on the board and returns its Posn
+void Board::findPiece(char c, Posn &start) {
+  for (int i=0; i<8; ++i) {
+    for (int j=0; j<8; ++j) {
+      if (this->grid[i][j].getPiece()->getName() == c) {
+        start = this->grid[i][j].getPiece()->getPos();
+        return;
+      }
+    }
+  } cout << "Piece " << c << " is not on the Board." << endl;
+}
+
+// removePiece(Posn &) removes the piece at pos, if there is no piece at pos, it does nothing
+void Board::removePiece(Posn &pos) {
+  if (this->grid[pos.x][pos.y].isOccupied()) {
+    this->grid[pos.x][pos.y].removePiece();
+  } else { return; }
 }
 
 // operator<<(out, b) outputs the board to out int the following format:
